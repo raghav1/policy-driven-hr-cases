@@ -1,0 +1,6 @@
+{
+    "scope": "x_2312287_hrorch",
+    "scopeId": "77e3b6970d2d4d759440ba33ca5637df",
+    "name": "HR Case Orchestration",
+    "tsconfigPath": "./src/server/tsconfig.json"
+}

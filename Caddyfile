@@ -1,0 +1,10 @@
+{$PUBLIC_HOST} {
+	# Only the endpoints ServiceNow calls are exposed; everything else is a 404.
+	@api path /triage /chat /ingest /health
+	handle @api {
+		reverse_proxy agent:8000
+	}
+	handle {
+		respond 404
+	}
+}
