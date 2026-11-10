@@ -4,6 +4,7 @@ A unit is the smallest citable piece: one sentence of prose, one list item sente
 table row. Every unit's text is an exact slice of the normalized article text, so a citation
 can always be traced back to a position in a specific article version.
 """
+
 import re
 from dataclasses import dataclass, field
 

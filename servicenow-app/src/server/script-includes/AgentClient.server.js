@@ -20,38 +20,57 @@ AgentClient.prototype = {
         });
     },
 
+    // The employee is sent with chat too, so the assistant only reads policies that apply to them.
     chat: function (caseGr, message, author) {
         return this._post('/chat', {
             case_id: caseGr.getUniqueValue(),
             number: caseGr.getValue('number'),
             message: String(message),
             author: String(author),
+            employee: this._employee(caseGr.getValue('opened_by')),
         });
     },
 
-    ingest: function (kbGr, event) {
-        return this._post('/ingest', {
-            sys_id: kbGr.getUniqueValue(),
-            number: kbGr.getValue('number'),
-            version: parseInt(kbGr.getValue('sys_mod_count'), 10) || 0,
-            event: String(event),
-        });
+    ingest: function (kbGr) {
+        return this._post('/ingest', { sys_id: kbGr.getUniqueValue() });
     },
 
-    // Country names used on cmn_location, mapped to the ISO codes the policy index uses.
-    COUNTRY_CODES: {
-        'usa': 'US', 'united states': 'US', 'united states of america': 'US',
-        'germany': 'DE', 'deutschland': 'DE',
-        'india': 'IN',
-        'united kingdom': 'GB', 'uk': 'GB', 'great britain': 'GB', 'england': 'GB',
-        'italy': 'IT', 'france': 'FR', 'canada': 'CA', 'australia': 'AU', 'japan': 'JP', 'china': 'CN',
-        'ireland': 'IE', 'spain': 'ES', 'netherlands': 'NL', 'mexico': 'MX', 'brazil': 'BR', 'brasil': 'BR',
+    // Other spellings of country names seen on cmn_location. The country list itself is the
+    // HR Profile country field's choices (ISO code = value, name = label).
+    COUNTRY_ALIASES: {
+        usa: 'US',
+        'united states of america': 'US',
+        deutschland: 'DE',
+        uk: 'GB',
+        'great britain': 'GB',
+        england: 'GB',
+        brasil: 'BR',
+    },
+
+    /** ISO code for a country name, or null when the app does not know the country. */
+    countryCode: function (name) {
+        var key = String(name || '')
+            .trim()
+            .toLowerCase();
+        if (!key) return null;
+        if (this.COUNTRY_ALIASES[key]) return this.COUNTRY_ALIASES[key];
+        var choice = new GlideRecord('sys_choice');
+        choice.addQuery('name', 'x_2312287_hrorch_hr_profile');
+        choice.addQuery('element', 'country');
+        choice.addQuery('inactive', false);
+        choice.query();
+        while (choice.next()) {
+            var code = choice.getValue('value');
+            if (choice.getValue('label').toLowerCase() == key || code.toLowerCase() == key)
+                return code;
+        }
+        return null;
     },
 
     /**
      * Country and employee type for the person who opened the case: the HR Profile first, then the
-     * country of the user's location. Unknown countries pass through as written, so the search only
-     * matches global policies for them.
+     * country of the user's location. An unknown country is sent as null, so the agent only sees
+     * global policies and the suggestion goes to HR for review.
      */
     _employee: function (userId) {
         var result = { country: null, employee_type: null };
@@ -64,8 +83,7 @@ AgentClient.prototype = {
         if (!result.country) {
             var user = new GlideRecord('sys_user');
             if (user.get(userId) && user.getValue('location')) {
-                var name = String(user.location.country || '').trim();
-                if (name) result.country = this.COUNTRY_CODES[name.toLowerCase()] || name;
+                result.country = this.countryCode(user.location.country);
             }
         }
         return result;
@@ -88,13 +106,28 @@ AgentClient.prototype = {
             var status = response.getStatusCode();
             var text = response.getBody();
             if (status < 200 || status >= 300) {
-                var detail = text || response.getErrorMessage() || '';
-                return { ok: false, status: status, error: 'HTTP ' + status + ': ' + String(detail).substring(0, 300) };
+                return {
+                    ok: false,
+                    status: status,
+                    error: this._describeError(status, text, response.getErrorMessage()),
+                };
             }
             return { ok: true, status: status, body: text ? JSON.parse(text) : null };
         } catch (e) {
             return { ok: false, status: 0, error: String(e) };
         }
+    },
+
+    // The service answers failures with {"error": code, "detail": message}.
+    _describeError: function (status, text, transportError) {
+        try {
+            var body = JSON.parse(text);
+            if (body && body.error)
+                return body.error + ': ' + body.detail + ' (HTTP ' + status + ')';
+        } catch (e) {
+            // not JSON: fall through
+        }
+        return 'HTTP ' + status + ': ' + String(text || transportError || '').substring(0, 300);
     },
 
     type: 'AgentClient',

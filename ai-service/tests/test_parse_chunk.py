@@ -3,7 +3,8 @@ from app.ingest.parse import parse_html, split_sentences
 
 HTML = """
 <h2>Eligibility</h2>
-<p>Employees in Germany are eligible after 6 months. Parental leave applies to every parent, e.g. adoptive parents.</p>
+<p>Employees in Germany are eligible after 6 months.
+Parental leave applies to every parent, e.g. adoptive parents.</p>
 <h2>Entitlement</h2>
 <h3>Standard entitlement</h3>
 <p>Employees in Germany are entitled to up to 3 years of parental leave per child.</p>
@@ -24,7 +25,7 @@ def test_every_unit_is_an_exact_slice_of_the_article_text():
     parsed = parse_html("Parental leave (Germany)", HTML)
     for section in parsed.sections:
         for unit in section.units:
-            assert parsed.text[unit.start:unit.end] == unit.text
+            assert parsed.text[unit.start : unit.end] == unit.text
 
 
 def test_sections_carry_their_heading_path():
@@ -48,6 +49,9 @@ def test_chunks_stay_within_a_section_and_overlap():
     assert len(a_chunks) > 1
     assert all(sum(len(u.text.split()) for u in c.units) <= 70 for c in a_chunks)
     # consecutive chunks share their boundary sentences
-    assert a_chunks[0].units[-1].text == a_chunks[1].units[0].text or a_chunks[0].units[-2].text == a_chunks[1].units[0].text
+    assert (
+        a_chunks[0].units[-1].text == a_chunks[1].units[0].text
+        or a_chunks[0].units[-2].text == a_chunks[1].units[0].text
+    )
     assert [c.section_path for c in chunks][-1] == "B"
     assert all(len(c.units) for c in chunks)

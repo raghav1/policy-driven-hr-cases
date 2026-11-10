@@ -1,4 +1,5 @@
 """Self-hosted embedding and reranking models (ONNX, CPU)."""
+
 from functools import lru_cache
 
 import numpy as np

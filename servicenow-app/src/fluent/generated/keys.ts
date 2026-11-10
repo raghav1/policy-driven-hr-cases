@@ -57,6 +57,10 @@ declare global {
                         table: 'sysevent_register'
                         id: 'ee7b841216aa4bddab1b871ccae03715'
                     }
+                    event_triage: {
+                        table: 'sysevent_register'
+                        id: '1869810fee2044f480b9b6d503c92d16'
+                    }
                     gm_ben: {
                         table: 'sys_user_grmember'
                         id: '1227dadc5bcf441bb91eb87932183be0'
@@ -452,6 +456,10 @@ declare global {
                         table: 'sysevent_script_action'
                         id: '49a644dbe2fa4a1699214b39b9c56981'
                     }
+                    sa_triage: {
+                        table: 'sysevent_script_action'
+                        id: 'df291d955db4446abddd8a453c10643f'
+                    }
                     si_agent_client: {
                         table: 'sys_script_include'
                         id: '83d2aac60e2c44eca9d7a1b5fafea3de'
@@ -618,6 +626,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '0f78c47b86194f24ac66a47cf32a0b56'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'close_notes'
+                            position: '9'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '12375987908849ed83d560bfea9e28a9'
                         deleted: true
@@ -638,6 +668,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '12a84473bbcf484d9289277a3779a237'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -655,6 +686,17 @@ declare global {
                             }
                             element: '.end_split'
                             position: '9'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '130e2f8bb82645949068a771c4448b1e'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'CA'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -723,6 +765,17 @@ declare global {
                             name: 'x_2312287_hrorch_routing_rule'
                             element: 'active'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '17c00ec1e3d447a5b62ad5ef9e9d80da'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'NL'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -877,6 +930,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '2818ac653a384f5ea975fecb5982383f'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_ui_action_role'
                         id: '2bd7d021b11f4ff5a8d87e34c44051cb'
                         key: {
@@ -988,6 +1050,17 @@ declare global {
                             name: 'x_2312287_hrorch_routing_rule'
                             element: 'assigned_to'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '3197549a907947699965829ee0751f17'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'FR'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -1113,6 +1186,7 @@ declare global {
                     {
                         table: 'sys_choice'
                         id: '3f33e3354aae4de8954cbc698be04a06'
+                        deleted: true
                         key: {
                             name: 'x_2312287_hrorch_hr_case'
                             element: 'ai_proposed_action'
@@ -1195,6 +1269,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '487d48ff4c534b5d82428b38b13450b1'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -1244,6 +1319,17 @@ declare global {
                             cat_item: '4993ecfc0fa44c2eb7e404f56391fe5d'
                             variable_set: 'NULL'
                             name: 'case_details'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '4cbb3c187e404bcd977f6b0f59b6ba63'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'MX'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -1369,6 +1455,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '546e943429834a70b9a405a5d5fac3c8'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -1466,6 +1553,15 @@ declare global {
                         key: {
                             name: 'x_2312287_hrorch_ai_citation'
                             element: 'ref_number'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '5bd39cf2113746a8bf63e998dd87a770'
+                        key: {
+                            name: 'x_2312287_hrorch_ai_citation'
+                            element: 'superseded'
+                            language: 'en'
                         }
                     },
                     {
@@ -1741,6 +1837,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '7ece8f8b9caf49cb9bdba7bf43ee9e88'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -1781,6 +1878,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '80ca2254ee4a49cc859c57e9340b9489'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '12M.x_2312287_hrorch_hr_case.x_2312287_hrorch_ai_citation.hr_case'
+                            position: '14'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '84f946e6da2a4fee90353b431605df76'
                         key: {
@@ -1796,6 +1915,39 @@ declare global {
                             name: 'x_2312287_hrorch_ai_citation'
                             element: 'chunk_id'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '86b9aa7d0df44b348b1fb92d4b45dd73'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.end_split'
+                            position: '10'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '872925a2781d4c9ba94a40fd5a763323'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                            value: 'rejected'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -1962,6 +2114,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '9a304a26ccf74fddbeef641341b0a87c'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -1988,6 +2141,17 @@ declare global {
                             name: 'x_2312287_hrorch_hr_profile'
                             element: 'country'
                             value: 'IN'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '9b0645be1e8149fc8ce81674ac4ec9eb'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'AU'
                             language: 'en'
                             dependent_value: 'NULL'
                         }
@@ -2047,6 +2211,17 @@ declare global {
                             name: 'x_2312287_hrorch_hr_case'
                             element: 'category'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'a141c64a261745bfac7db05f46aebb03'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                            value: 'pending'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -2113,12 +2288,56 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'a794d02372f04802a17ed1ea701d3346'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                            value: 'approved'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'a799096dd7724008b816a7491707e96f'
                         key: {
                             name: 'x_2312287_hrorch_routing_rule'
                             element: 'assignment_group'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'aa5056cc05594a45b6bb405b33bf412c'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'ai_suggestion'
+                            position: '12'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'aa6c3133f74e4ab58ea3e76d2274a891'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                            value: 'superseded'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -2196,6 +2415,17 @@ declare global {
                             }
                             element: '.end_split'
                             position: '12'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'b59c22c84b334e9294823eab1da99158'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'BR'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {
@@ -2308,6 +2538,17 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'bc70377a9d744ce7ae0cd81f31f39b1f'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'ES'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'bd44a9343da546c0a606a0e8732d4c23'
                         key: {
@@ -2361,6 +2602,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'c280f31014734cc0b44da218b89dc834'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -2448,6 +2690,17 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'c776ca82ae3d4a62af7092ef38eeb5f0'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'IE'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
                         table: 'sys_security_acl_role'
                         id: 'c9732ab7abaf4e00a8699f1a9f5bbc3b'
                         key: {
@@ -2462,7 +2715,19 @@ declare global {
                     },
                     {
                         table: 'sys_choice'
+                        id: 'c9a8bec889464a3a9388ec83444cccc2'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'JP'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
                         id: 'ca2561aa0a6f4c10bc01236f4847df13'
+                        deleted: true
                         key: {
                             name: 'x_2312287_hrorch_hr_case'
                             element: 'ai_proposed_action'
@@ -2554,6 +2819,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'd10e465bc56946b09d42ea78a3dcc459'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'ai_proposal_state'
+                            position: '7'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'd3cccdce2ace43a9b3c58ac4c4175c34'
                         key: {
@@ -2565,6 +2852,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'd4d540539ecc4bbcac787eacb69199db'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '69b486d4c6784a63b2bd5fb3e61318fc'
@@ -2710,6 +2998,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'e0939d71f54e48cab9538d1bf07bc011'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'ai_reasoning'
+                            position: '11'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: 'e0b8a287c79e4da6ab975e26bb20e130'
                         key: {
@@ -2740,6 +3050,44 @@ declare global {
                             value: 'any'
                             language: 'en'
                             dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_choice_set'
+                        id: 'e3ca72d4f7434a9ca68df02211ce4986'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'e61f4237be9b4f758d36e9f89787c5ea'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'ai_trace_id'
+                            position: '8'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'e915a28a4b6e4cfb85c5c9b31ebf976c'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_case'
+                            element: 'ai_proposal_state'
                         }
                     },
                     {
@@ -2795,6 +3143,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'f08ff30dc9364325b6c3ae559939e654'
+                        key: {
+                            name: 'x_2312287_hrorch_ai_citation'
+                            element: 'superseded'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'f30504a39e9c4fb5bde2a8cd088edde9'
                         key: {
@@ -2818,6 +3174,17 @@ declare global {
                             name: 'x_2312287_hrorch_hr_case'
                             element: 'severity'
                             value: 'low'
+                            language: 'en'
+                            dependent_value: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'f4caa7d54f0d4176aadd2d6ebed47e4b'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'IT'
                             language: 'en'
                             dependent_value: 'NULL'
                         }
@@ -2847,6 +3214,28 @@ declare global {
                         id: 'f78de0b70c3c4578b0adfab52d062b74'
                         key: {
                             name: 'x_2312287_hrorch_hr_profile'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'f7b35c443ca64ced8f81c2e38e0659af'
+                        key: {
+                            sys_ui_section: {
+                                id: '69b486d4c6784a63b2bd5fb3e61318fc'
+                                key: {
+                                    name: 'x_2312287_hrorch_hr_case'
+                                    caption: 'AI assistant'
+                                    view: {
+                                        id: 'Default view'
+                                        key: {
+                                            name: 'NULL'
+                                        }
+                                    }
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'ai_proposed_resolution'
+                            position: '13'
                         }
                     },
                     {
@@ -2885,6 +3274,17 @@ declare global {
                         key: {
                             name: 'x_2312287_hrorch_ai_citation'
                             element: 'kb_article'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'f99848babc3f47499346ebb41e0a15df'
+                        key: {
+                            name: 'x_2312287_hrorch_hr_profile'
+                            element: 'country'
+                            value: 'CN'
+                            language: 'en'
+                            dependent_value: 'NULL'
                         }
                     },
                     {

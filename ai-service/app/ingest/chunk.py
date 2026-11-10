@@ -1,4 +1,5 @@
 """Packs units into chunks: never across sections, cut only between units, with a small overlap."""
+
 import hashlib
 from dataclasses import dataclass
 

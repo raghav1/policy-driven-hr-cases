@@ -35,23 +35,6 @@ HR clicks "Approve AI close" -> ServiceNow closes the case and records who appro
 A policy article is published or edited -> POST /ingest -> re-indexed within seconds
 ```
 
-## Repository layout
-
-| Path | Contents |
-|---|---|
-| `ai-service/app/main.py` | FastAPI endpoints, API-key auth, rate limiting, startup |
-| `ai-service/app/agent/` | LangGraph workflows (`graph.py`), Claude adapter (`llm.py`), offline stand-in (`offline.py`), MCP tool server and client, prompts, citation checks |
-| `ai-service/app/ingest/` | HTML parsing into citable sentences, heading-aware chunking, index sync |
-| `ai-service/app/search/` | Hybrid retrieval: pgvector + Postgres full text, reciprocal rank fusion, cross-encoder rerank |
-| `ai-service/app/sources.py` | Read-only access to ServiceNow (Table API) or the local corpus |
-| `ai-service/tests/` | Unit and integration tests |
-| `servicenow-app/src/fluent/` | Scoped app as code (ServiceNow SDK): tables, roles, security, logic, UI, reference data |
-| `servicenow-app/src/server/` | Script includes: `AgentClient`, `RoutingEngine`, `CaseOrchestrator` |
-| `servicenow-app/scripts/` | Instance setup: seed HR data, configure the AI service connection, connectivity check |
-| `scripts/` | Synthetic policy generator, ServiceNow seed builder, end-to-end scenario checks |
-| `corpus/` | 51 synthetic HR policy articles for a fictional company (generated) |
-| `docs/` | Design and planning documents; `docs/source/` regenerates the PDFs |
-
 ## Run the AI service
 
 Requires Docker.
@@ -94,18 +77,26 @@ HR policies and routing rules are not part of the app package: HR owns them in t
 
 ## Tests
 
+Tests run in the stack against a scratch database and the local corpus, so they never touch the live index:
+
 ```bash
-docker compose run --rm agent pytest -m "not integration"   # parsing, chunking, citation checks
-docker compose run --rm agent pytest -s -m integration      # retrieval recall@5 on 30 questions, graph runs via MCP
-python3 scripts/run_scenarios.py                            # end-to-end checks against the running API
+docker compose exec db psql -U hr -d hr_policies -c "CREATE DATABASE hr_test"   # once
+docker compose run --rm -e DATABASE_URL=postgresql://hr:hr@db:5432/hr_test -e KB_SOURCE=local \
+  agent pytest -m "not integration"     # citation rules, tool binding, parsing, chunking
+docker compose run --rm -e DATABASE_URL=postgresql://hr:hr@db:5432/hr_test -e KB_SOURCE=local \
+  agent pytest -m integration           # safety gates over the HTTP API, graph runs via MCP
+python3 scripts/check_choice_lists.py   # ServiceNow choice lists match the service's categories
 ```
+
+On demand, against an indexed database: `docker compose run --rm agent python -m evals.retrieval` (retrieval recall@5) and `python3 scripts/run_scenarios.py` (end-to-end checks against the running API with the real model).
 
 ## Design choices worth knowing
 
-- **Exact citations.** Retrieved sentences go to Claude as search results with citations enabled. Each citation is checked word for word against the stored text; a sentence without a citation gets one repair attempt and is otherwise removed, and a draft that needed removals is never posted to the employee.
-- **Country-aware answers.** The employee's country comes from their HR Profile or their location. Search only returns that country's policies plus global ones; if the country is unknown, the suggestion goes to HR for review.
-- **Human in the loop.** The agent can only propose closing a case. If staff ask it to close, a proposal is always recorded (with any doubts in the resolution) and an HR agent approves or rejects it.
-- **Fail safe.** Any AI failure, timeout or invalid response routes the case to HR Manual Triage with a work note explaining why.
+- **Exact citations.** Retrieved sentences go to Claude as search results with citations enabled. Each citation is checked word for word against the stored text. Uncited text is allowed only as short connective phrases with no facts in them (no numbers, durations, amounts or policy terms); anything else gets one repair attempt and is otherwise removed, and a draft that needed removals is never posted to the employee.
+- **Country-aware answers.** The employee's country comes from their HR Profile or their location. The service, not the model, binds it to every tool call: search only returns that country's policies plus global ones, and a citation to any other country's policy is rejected. If the country is unknown, only global policies are visible and the suggestion goes to HR for review.
+- **Human in the loop.** The agent can only propose closing a case. If staff ask it to close, a proposal is always recorded (with any doubts in the resolution) and an HR agent approves or rejects it. A newer triage or @ai request supersedes an open proposal, so only the latest one can be approved. Only HR agents can call the assistant, and only from work notes.
+- **Fail safe.** Any AI failure, timeout or invalid response routes the case to HR Manual Triage with a work note explaining why. The service reports failures as stable codes (`llm_refused`, `index_unavailable`, `busy`, ...) and caps how many agent runs happen at once.
+- **Agent framework.** The workflow is a LangGraph graph (classification runs in parallel with drafting; a citation-repair loop) and the read-only tools are an MCP server, so other agents can reuse them. Tools run blocking work off the event loop, and the case number and country are bound by the service, not chosen by the model.
 - **Least privilege.** The integration user can read cases and HR articles and write nothing.
 
 All data is synthetic. Before using real employee data, add the sensitivity check and redaction described in the backlog.

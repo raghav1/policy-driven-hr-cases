@@ -1,0 +1,17 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[lint.per-file-ignores]
+# Generators whose long lines are prose and HTML inside string literals (policy text, document body).
+"scripts/generate_corpus.py" = ["E501"]
+"docs/source/*.py" = ["E501"]
+
+[lint.isort]
+known-first-party = ["app", "tests", "evals"]
+
+[lint.flake8-bugbear]
+# FastAPI declares dependencies as default arguments.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header"]

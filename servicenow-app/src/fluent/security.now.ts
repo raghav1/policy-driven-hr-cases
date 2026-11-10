@@ -58,7 +58,8 @@ Acl({
     description: 'HR agents and the AI integration user can read HR profiles',
 })
 
-// Work notes on task-based tables are restricted by default; the AI reads them to answer @ai in context.
+// Work notes on task-based tables are restricted by default; the AI reads them to answer @ai in
+// context.
 Acl({
     $id: Now.ID['acl_case_work_notes_read'],
     type: 'record',

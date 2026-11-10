@@ -1,4 +1,5 @@
 """Generate plan.html for the full MVP plan. Usage: python3 plan_pdf.py OUT.html"""
+
 import sys
 from html import escape
 
@@ -14,18 +15,28 @@ STYLE = {
 def seq(mid, lanes, steps, label):
     top, step = 72, 26
     bottom = top + step * (len(steps) - 1) + 18
-    out = [f'<svg viewBox="0 0 720 {bottom + 5}" role="img" aria-label="{escape(label)}">',
-           f'<defs><marker id="{mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
-    for x, (t, sub, st) in zip(LANE_X, lanes):
+    out = [
+        f'<svg viewBox="0 0 720 {bottom + 5}" role="img" aria-label="{escape(label)}">',
+        f'<defs><marker id="{mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
+    for x, (t, sub, st) in zip(LANE_X, lanes, strict=False):
         fill, stroke, ink = STYLE[st]
         w = 110 if x in (60, 660) else 120
-        out.append(f'<rect x="{x - w / 2}" y="8" width="{w}" height="38" rx="6" fill="{fill}" stroke="{stroke}"/>')
+        out.append(
+            f'<rect x="{x - w / 2}" y="8" width="{w}" height="38" rx="6" fill="{fill}" stroke="{stroke}"/>'
+        )
         if sub:
-            out.append(f'<text x="{x}" y="24" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>'
-                       f'<text x="{x}" y="38" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>')
+            out.append(
+                f'<text x="{x}" y="24" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>'
+                f'<text x="{x}" y="38" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>'
+            )
         else:
-            out.append(f'<text x="{x}" y="31" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>')
-        out.append(f'<line x1="{x}" y1="46" x2="{x}" y2="{bottom}" stroke="#a8a29e" stroke-dasharray="3 4"/>')
+            out.append(
+                f'<text x="{x}" y="31" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>'
+            )
+        out.append(
+            f'<line x1="{x}" y1="46" x2="{x}" y2="{bottom}" stroke="#a8a29e" stroke-dasharray="3 4"/>'
+        )
     for i, s in enumerate(steps):
         y, n = top + step * i, i + 1
         if s[0] == "m":
@@ -33,14 +44,22 @@ def seq(mid, lanes, steps, label):
             xa, xb = LANE_X[a], LANE_X[b]
             end = xb - 2 if xb > xa else xb + 2
             dash = ' stroke-dasharray="5 3"' if dashed else ""
-            out.append(f'<line x1="{xa}" y1="{y}" x2="{end}" y2="{y}" stroke="#44403c" stroke-width="1.4" marker-end="url(#{mid})"{dash}/>')
-            out.append(f'<text x="{(xa + xb) / 2}" y="{y - 5}" text-anchor="middle" font-size="10" class="halo">{n}  {escape(text)}</text>')
+            out.append(
+                f'<line x1="{xa}" y1="{y}" x2="{end}" y2="{y}" stroke="#44403c" stroke-width="1.4" marker-end="url(#{mid})"{dash}/>'
+            )
+            out.append(
+                f'<text x="{(xa + xb) / 2}" y="{y - 5}" text-anchor="middle" font-size="10" class="halo">{n}  {escape(text)}</text>'
+            )
         else:
             _, a, text = s
             x = LANE_X[a]
             fill, stroke, _ = STYLE[lanes[a][2]]
-            out.append(f'<rect x="{x - 7}" y="{y - 11}" width="14" height="22" rx="2" fill="{fill}" stroke="{stroke}"/>')
-            out.append(f'<text x="{x + 14}" y="{y + 4}" font-size="10" class="halo">{n}  {escape(text)}</text>')
+            out.append(
+                f'<rect x="{x - 7}" y="{y - 11}" width="14" height="22" rx="2" fill="{fill}" stroke="{stroke}"/>'
+            )
+            out.append(
+                f'<text x="{x + 14}" y="{y + 4}" font-size="10" class="halo">{n}  {escape(text)}</text>'
+            )
     out.append("</svg>")
     return "\n".join(out)
 
@@ -50,18 +69,26 @@ def pipeline(mid, boxes, label):
     n = len(boxes)
     gap = 18
     w = (720 - gap * (n - 1)) / n
-    out = [f'<svg viewBox="0 0 720 76" role="img" aria-label="{escape(label)}">',
-           f'<defs><marker id="{mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
+    out = [
+        f'<svg viewBox="0 0 720 76" role="img" aria-label="{escape(label)}">',
+        f'<defs><marker id="{mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
     for i, (lines, st) in enumerate(boxes):
         fill, stroke, _ = STYLE[st]
         x = i * (w + gap)
-        out.append(f'<rect x="{x + 0.5}" y="6" width="{w - 1}" height="64" rx="6" fill="{fill}" stroke="{stroke}"/>')
+        out.append(
+            f'<rect x="{x + 0.5}" y="6" width="{w - 1}" height="64" rx="6" fill="{fill}" stroke="{stroke}"/>'
+        )
         y0 = 38 - (len(lines) - 1) * 7
         for j, ln in enumerate(lines):
             weight = ' font-weight="600"' if j == 0 else ' fill="#57534e"'
-            out.append(f'<text x="{x + w / 2}" y="{y0 + j * 14}" text-anchor="middle" font-size="9.5"{weight}>{escape(ln)}</text>')
+            out.append(
+                f'<text x="{x + w / 2}" y="{y0 + j * 14}" text-anchor="middle" font-size="9.5"{weight}>{escape(ln)}</text>'
+            )
         if i < n - 1:
-            out.append(f'<line x1="{x + w + 1}" y1="38" x2="{x + w + gap - 2}" y2="38" stroke="#44403c" stroke-width="1.4" marker-end="url(#{mid})"/>')
+            out.append(
+                f'<line x1="{x + w + 1}" y1="38" x2="{x + w + gap - 2}" y2="38" stroke="#44403c" stroke-width="1.4" marker-end="url(#{mid})"/>'
+            )
     out.append("</svg>")
     return "\n".join(out)
 
@@ -70,52 +97,87 @@ def box(x, y, w, h, title, sub, st, fill="#fff", dashed=False):
     _, stroke, ink = STYLE[st]
     d = ' stroke-dasharray="4 3"' if dashed else ""
     cx = x + w / 2
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="{fill}" stroke="{stroke}"{d}/>'
-            f'<text x="{cx}" y="{y + h / 2 - 2}" text-anchor="middle" font-size="10.5" font-weight="600">{escape(title)}</text>'
-            f'<text x="{cx}" y="{y + h / 2 + 11}" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>')
+    return (
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="{fill}" stroke="{stroke}"{d}/>'
+        f'<text x="{cx}" y="{y + h / 2 - 2}" text-anchor="middle" font-size="10.5" font-weight="600">{escape(title)}</text>'
+        f'<text x="{cx}" y="{y + h / 2 + 11}" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>'
+    )
 
 
 def system_map():
-    o = ['<svg viewBox="0 0 760 340" role="img" aria-label="System map: people, ServiceNow, this laptop, Claude API">',
-         '<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
-    o.append('<rect x="0" y="30" width="126" height="300" rx="8" fill="#f5f5f4" stroke="#a8a29e"/>'
-             '<text x="12" y="49" font-size="11" font-weight="700" fill="#57534e">People</text>')
-    for y, t, s in [(60, "Employee", "Service Portal"), (120, "HR agent", "case form, @ai, approve"), (180, "Policy admin", "rules and articles")]:
+    o = [
+        '<svg viewBox="0 0 760 340" role="img" aria-label="System map: people, ServiceNow, this laptop, Claude API">',
+        '<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
+    o.append(
+        '<rect x="0" y="30" width="126" height="300" rx="8" fill="#f5f5f4" stroke="#a8a29e"/>'
+        '<text x="12" y="49" font-size="11" font-weight="700" fill="#57534e">People</text>'
+    )
+    for y, t, s in [
+        (60, "Employee", "Service Portal"),
+        (120, "HR agent", "case form, @ai, approve"),
+        (180, "Policy admin", "rules and articles"),
+    ]:
         o.append(box(8, y, 110, 44, t, s, "ppl"))
-    o.append('<rect x="140" y="30" width="340" height="300" rx="8" fill="#edf6f0" stroke="#2f7d4f"/>'
-             '<text x="152" y="49" font-size="11" font-weight="700" fill="#2f7d4f">ServiceNow developer instance (cloud)</text>')
-    for y, t, s in [(60, "HR Case table", "case, AI fields, citations"), (120, "\"Approve AI close\"", "UI action, HR only"),
-                    (180, "Routing Decision Table", "category to group, assignee"), (240, "Knowledge base", "HR policy articles")]:
+    o.append(
+        '<rect x="140" y="30" width="340" height="300" rx="8" fill="#edf6f0" stroke="#2f7d4f"/>'
+        '<text x="152" y="49" font-size="11" font-weight="700" fill="#2f7d4f">ServiceNow developer instance (cloud)</text>'
+    )
+    for y, t, s in [
+        (60, "HR Case table", "case, AI fields, citations"),
+        (120, '"Approve AI close"', "UI action, HR only"),
+        (180, "Routing Decision Table", "category to group, assignee"),
+        (240, "Knowledge base", "HR policy articles"),
+    ]:
         o.append(box(152, y, 150, 44, t, s, "sn"))
-    for y, t, s in [(60, "AgentClient", "/triage /chat /ingest"), (120, "Table API", "built in, read-only user"),
-                    (180, "Triage Flow, @ai rule", "call agent, apply result"), (240, "KB changed rule", "calls /ingest")]:
+    for y, t, s in [
+        (60, "AgentClient", "/triage /chat /ingest"),
+        (120, "Table API", "built in, read-only user"),
+        (180, "Triage Flow, @ai rule", "call agent, apply result"),
+        (240, "KB changed rule", "calls /ingest"),
+    ]:
         o.append(box(318, y, 150, 44, t, s, "sn"))
-    o.append('<rect x="495" y="30" width="160" height="300" rx="8" fill="#edf2fb" stroke="#2b5faa"/>'
-             '<text x="505" y="49" font-size="11" font-weight="700" fill="#2b5faa">This laptop (Docker)</text>')
-    for y, t, s in [(58, "Caddy :443", "HTTPS, API key, limits"), (102, "Agent service", "/triage, /chat"),
-                    (146, "Ingestion", "/ingest, nightly sync"), (190, "MCP server", "3 read-only tools"),
-                    (234, "Postgres + pgvector", "chunks, embeddings"), (278, "Ollama", "local embeddings")]:
+    o.append(
+        '<rect x="495" y="30" width="160" height="300" rx="8" fill="#edf2fb" stroke="#2b5faa"/>'
+        '<text x="505" y="49" font-size="11" font-weight="700" fill="#2b5faa">This laptop (Docker)</text>'
+    )
+    for y, t, s in [
+        (58, "Caddy :443", "HTTPS, API key, limits"),
+        (102, "Agent service", "/triage, /chat"),
+        (146, "Ingestion", "/ingest, nightly sync"),
+        (190, "MCP server", "3 read-only tools"),
+        (234, "Postgres + pgvector", "chunks, embeddings"),
+        (278, "Ollama", "local embeddings"),
+    ]:
         o.append(box(505, y, 140, 38, t, s, "ag"))
-    o.append('<rect x="670" y="96" width="88" height="56" rx="8" fill="#fdf3e4" stroke="#a35c00"/>'
-             '<text x="714" y="121" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a35c00">Claude API</text>'
-             '<text x="714" y="136" text-anchor="middle" font-size="8.5" fill="#57534e">cloud LLM</text>')
-    o.append('<text x="487" y="28" text-anchor="middle" font-size="8.5" fill="#57534e">public IP</text>')
-    o.append('<g stroke="#44403c" stroke-width="1.4" fill="none">'
-             '<line x1="118" y1="82" x2="150" y2="82" marker-end="url(#a)"/>'
-             '<line x1="118" y1="142" x2="150" y2="142" marker-end="url(#a)"/>'
-             '<line x1="118" y1="202" x2="150" y2="202" marker-end="url(#a)"/>'
-             '<line x1="302" y1="82" x2="316" y2="82" marker-end="url(#a)"/>'
-             '<line x1="470" y1="77" x2="503" y2="77" marker-start="url(#a)" marker-end="url(#a)"/>'
-             '<line x1="575" y1="96" x2="575" y2="100" marker-end="url(#a)"/>'
-             '<path d="M505,209 H488 V142 H470" marker-end="url(#a)"/>'
-             '<path d="M505,165 H488"/>'
-             '<line x1="575" y1="228" x2="575" y2="232" marker-end="url(#a)"/>'
-             '<line x1="645" y1="124" x2="668" y2="124" marker-start="url(#a)" marker-end="url(#a)"/>'
-             '</g>')
-    o.append('<g font-size="10" font-weight="700" text-anchor="middle">'
-             '<text x="487" y="70" class="halo">1</text>'
-             '<text x="657" y="117" class="halo">2</text>'
-             '<text x="480" y="182" class="halo">3</text></g>')
+    o.append(
+        '<rect x="670" y="96" width="88" height="56" rx="8" fill="#fdf3e4" stroke="#a35c00"/>'
+        '<text x="714" y="121" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a35c00">Claude API</text>'
+        '<text x="714" y="136" text-anchor="middle" font-size="8.5" fill="#57534e">cloud LLM</text>'
+    )
+    o.append(
+        '<text x="487" y="28" text-anchor="middle" font-size="8.5" fill="#57534e">public IP</text>'
+    )
+    o.append(
+        '<g stroke="#44403c" stroke-width="1.4" fill="none">'
+        '<line x1="118" y1="82" x2="150" y2="82" marker-end="url(#a)"/>'
+        '<line x1="118" y1="142" x2="150" y2="142" marker-end="url(#a)"/>'
+        '<line x1="118" y1="202" x2="150" y2="202" marker-end="url(#a)"/>'
+        '<line x1="302" y1="82" x2="316" y2="82" marker-end="url(#a)"/>'
+        '<line x1="470" y1="77" x2="503" y2="77" marker-start="url(#a)" marker-end="url(#a)"/>'
+        '<line x1="575" y1="96" x2="575" y2="100" marker-end="url(#a)"/>'
+        '<path d="M505,209 H488 V142 H470" marker-end="url(#a)"/>'
+        '<path d="M505,165 H488"/>'
+        '<line x1="575" y1="228" x2="575" y2="232" marker-end="url(#a)"/>'
+        '<line x1="645" y1="124" x2="668" y2="124" marker-start="url(#a)" marker-end="url(#a)"/>'
+        "</g>"
+    )
+    o.append(
+        '<g font-size="10" font-weight="700" text-anchor="middle">'
+        '<text x="487" y="70" class="halo">1</text>'
+        '<text x="657" y="117" class="halo">2</text>'
+        '<text x="480" y="182" class="halo">3</text></g>'
+    )
     o.append("</svg>")
     return "\n".join(o)
 
@@ -125,47 +187,61 @@ LLM = ("Claude API", "", "llm")
 SN = ("ServiceNow", "", "sn")
 AG = ("Agent service", "laptop", "ag")
 
-TRIAGE = seq("t", [("Employee", "", "ppl"), SN, AG, TOOLS, LLM], [
-    ("m", 0, 1, "Submit case: title, description", False),
-    ("s", 1, "Triage Flow starts (async)"),
-    ("m", 1, 2, "POST /triage (public IP)", False),
-    ("m", 2, 4, "Prompt + case", False),
-    ("m", 4, 2, "Tool call: search_policies", True),
-    ("m", 2, 3, "Hybrid search + rerank", False),
-    ("m", 3, 2, "Top 5 chunks", True),
-    ("m", 2, 4, "Chunks as search_result blocks", False),
-    ("m", 4, 2, "Classification + cited suggestion", True),
-    ("s", 2, "Check every quote word for word"),
-    ("m", 2, 1, "Triage JSON + citations", True),
-    ("s", 1, "Save AI fields and citations. Decision Table picks group, assignee"),
-    ("s", 1, "All claims cited and confidence at or above threshold?"),
-    ("m", 1, 0, "AI suggestion with quotes, or skip", False),
-], "Sequence of a new case being triaged")
+TRIAGE = seq(
+    "t",
+    [("Employee", "", "ppl"), SN, AG, TOOLS, LLM],
+    [
+        ("m", 0, 1, "Submit case: title, description", False),
+        ("s", 1, "Triage Flow starts (async)"),
+        ("m", 1, 2, "POST /triage (public IP)", False),
+        ("m", 2, 4, "Prompt + case", False),
+        ("m", 4, 2, "Tool call: search_policies", True),
+        ("m", 2, 3, "Hybrid search + rerank", False),
+        ("m", 3, 2, "Top 5 chunks", True),
+        ("m", 2, 4, "Chunks as search_result blocks", False),
+        ("m", 4, 2, "Classification + cited suggestion", True),
+        ("s", 2, "Check every quote word for word"),
+        ("m", 2, 1, "Triage JSON + citations", True),
+        ("s", 1, "Save AI fields and citations. Decision Table picks group, assignee"),
+        ("s", 1, "All claims cited and confidence at or above threshold?"),
+        ("m", 1, 0, "AI suggestion with quotes, or skip", False),
+    ],
+    "Sequence of a new case being triaged",
+)
 
-CHAT = seq("c", [("HR agent", "", "ppl"), SN, AG, TOOLS, LLM], [
-    ("m", 0, 1, "Work note: @ai check KB0010003", False),
-    ("s", 1, "@ai business rule fires (async)"),
-    ("m", 1, 2, "POST /chat", False),
-    ("m", 2, 4, "Prompt + message", False),
-    ("m", 4, 2, "Tool calls: get_case, get_policy_section", True),
-    ("m", 2, 3, "get_case, get_policy_section", False),
-    ("m", 3, 2, "Case, comments, section", True),
-    ("m", 2, 4, "Results as search_result blocks", False),
-    ("m", 4, 2, "Cited reply, proposed_action: close", True),
-    ("m", 2, 1, "Reply, citations, proposal", True),
-    ("s", 1, "Post cited reply as work note. Save proposal. Show Approve"),
-    ("m", 0, 1, "HR clicks \"Approve AI close\"", False),
-    ("s", 1, "Close with proposed resolution. Record approver"),
-], "Sequence of an @ai request ending in an approved close")
+CHAT = seq(
+    "c",
+    [("HR agent", "", "ppl"), SN, AG, TOOLS, LLM],
+    [
+        ("m", 0, 1, "Work note: @ai check KB0010003", False),
+        ("s", 1, "@ai business rule fires (async)"),
+        ("m", 1, 2, "POST /chat", False),
+        ("m", 2, 4, "Prompt + message", False),
+        ("m", 4, 2, "Tool calls: get_case, get_policy_section", True),
+        ("m", 2, 3, "get_case, get_policy_section", False),
+        ("m", 3, 2, "Case, comments, section", True),
+        ("m", 2, 4, "Results as search_result blocks", False),
+        ("m", 4, 2, "Cited reply, proposed_action: close", True),
+        ("m", 2, 1, "Reply, citations, proposal", True),
+        ("s", 1, "Post cited reply as work note. Save proposal. Show Approve"),
+        ("m", 0, 1, 'HR clicks "Approve AI close"', False),
+        ("s", 1, "Close with proposed resolution. Record approver"),
+    ],
+    "Sequence of an @ai request ending in an approved close",
+)
 
-INGEST = pipeline("i", [
-    (["KB article", "published, updated", "or retired"], "sn"),
-    (["KB changed rule", "POST /ingest", "(+ nightly sync)"], "sn"),
-    (["Fetch", "Table API,", "read-only user"], "ag"),
-    (["Parse", "HTML to sections,", "lists, tables"], "ag"),
-    (["Chunk + embed", "~450 tokens,", "Ollama"], "ag"),
-    (["Upsert", "pgvector; old", "versions inactive"], "ag"),
-], "Ingestion pipeline from KB article to index")
+INGEST = pipeline(
+    "i",
+    [
+        (["KB article", "published, updated", "or retired"], "sn"),
+        (["KB changed rule", "POST /ingest", "(+ nightly sync)"], "sn"),
+        (["Fetch", "Table API,", "read-only user"], "ag"),
+        (["Parse", "HTML to sections,", "lists, tables"], "ag"),
+        (["Chunk + embed", "~450 tokens,", "Ollama"], "ag"),
+        (["Upsert", "pgvector; old", "versions inactive"], "ag"),
+    ],
+    "Ingestion pipeline from KB article to index",
+)
 
 CSS = """
   @page { size: Letter; margin: 0.55in 0.6in; }
@@ -208,7 +284,7 @@ SN_T = '<span class="tag t-sn">ServiceNow</span>'
 AG_T = '<span class="tag t-ag">Laptop</span>'
 LLM_T = '<span class="tag t-llm">Claude API</span>'
 
-HTML = f'''<!doctype html>
+HTML = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>HR Case Engine MVP Plan</title><style>{CSS}</style></head>
 <body>
 
@@ -513,6 +589,6 @@ GET /api/now/table/x_hrorch_hr_case
 </div>
 
 </body></html>
-'''
+"""
 
 open(sys.argv[1], "w").write(HTML)

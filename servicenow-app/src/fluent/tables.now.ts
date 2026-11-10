@@ -25,25 +25,62 @@ export const x_2312287_hrorch_hr_case = Table({
     createRoles: [hrAgent],
     deleteRoles: [policyAdmin],
     schema: {
-        category: ChoiceColumn({ label: 'Category', choices: { leave: 'Leave', benefits: 'Benefits', payroll: 'Payroll', other: 'Other', unknown: 'Unknown' }, dropdown: 'dropdown_with_none' }),
+        category: ChoiceColumn({
+            label: 'Category',
+            choices: {
+                leave: 'Leave',
+                benefits: 'Benefits',
+                payroll: 'Payroll',
+                other: 'Other',
+                unknown: 'Unknown',
+            },
+            dropdown: 'dropdown_with_none',
+        }),
         topics: StringColumn({ label: 'Topics', maxLength: 200 }),
-        severity: ChoiceColumn({ label: 'Severity', choices: { low: 'Low', medium: 'Medium', high: 'High' }, dropdown: 'dropdown_with_none' }),
-        routing_rule: ReferenceColumn({ label: 'Routing rule', referenceTable: 'x_2312287_hrorch_routing_rule' }),
+        severity: ChoiceColumn({
+            label: 'Severity',
+            choices: { low: 'Low', medium: 'Medium', high: 'High' },
+            dropdown: 'dropdown_with_none',
+        }),
+        routing_rule: ReferenceColumn({
+            label: 'Routing rule',
+            referenceTable: 'x_2312287_hrorch_routing_rule',
+        }),
         ai_status: ChoiceColumn({
             label: 'AI status',
-            choices: { pending: 'Pending', completed: 'Completed', failed: 'Failed', off: 'AI off' },
+            choices: {
+                pending: 'Pending',
+                completed: 'Completed',
+                failed: 'Failed',
+                off: 'AI off',
+            },
             default: 'pending',
         }),
         ai_confidence: DecimalColumn({ label: 'AI confidence', scale: 2 }),
         ai_reasoning: MultiLineTextColumn({ label: 'AI reasoning', maxLength: 2000 }),
         ai_suggestion: MultiLineTextColumn({ label: 'AI draft reply', maxLength: 8000 }),
         ai_suggestion_posted: BooleanColumn({ label: 'AI suggestion posted', default: false }),
+        // What the AI proposed, and where that proposal stands. Only a pending proposal can be
+        // approved.
         ai_proposed_action: ChoiceColumn({
             label: 'AI proposed action',
-            choices: { close: 'Close case', approved: 'Approved', rejected: 'Rejected' },
+            choices: { close: 'Close case' },
             dropdown: 'dropdown_with_none',
         }),
-        ai_proposed_resolution: MultiLineTextColumn({ label: 'AI proposed resolution', maxLength: 2000 }),
+        ai_proposal_state: ChoiceColumn({
+            label: 'AI proposal state',
+            choices: {
+                pending: 'Pending approval',
+                approved: 'Approved',
+                rejected: 'Rejected',
+                superseded: 'Superseded',
+            },
+            dropdown: 'dropdown_with_none',
+        }),
+        ai_proposed_resolution: MultiLineTextColumn({
+            label: 'AI proposed resolution',
+            maxLength: 2000,
+        }),
         ai_trace_id: StringColumn({ label: 'AI trace ID', maxLength: 40 }),
         ai_model: StringColumn({ label: 'AI model', maxLength: 80 }),
     },
@@ -63,9 +100,30 @@ export const x_2312287_hrorch_routing_rule = Table({
         name: StringColumn({ label: 'Name', maxLength: 100, mandatory: true }),
         order: IntegerColumn({ label: 'Order', mandatory: true, default: '100' }),
         active: BooleanColumn({ label: 'Active', default: true }),
-        category: ChoiceColumn({ label: 'When category is', choices: { any: 'Any', leave: 'Leave', benefits: 'Benefits', payroll: 'Payroll', other: 'Other', unknown: 'Unknown' }, default: 'any', mandatory: true }),
-        severity: ChoiceColumn({ label: 'And severity is', choices: { any: 'Any', low: 'Low', medium: 'Medium', high: 'High' }, default: 'any', mandatory: true }),
-        assignment_group: ReferenceColumn({ label: 'Assign to group', referenceTable: 'sys_user_group', mandatory: true }),
+        category: ChoiceColumn({
+            label: 'When category is',
+            choices: {
+                any: 'Any',
+                leave: 'Leave',
+                benefits: 'Benefits',
+                payroll: 'Payroll',
+                other: 'Other',
+                unknown: 'Unknown',
+            },
+            default: 'any',
+            mandatory: true,
+        }),
+        severity: ChoiceColumn({
+            label: 'And severity is',
+            choices: { any: 'Any', low: 'Low', medium: 'Medium', high: 'High' },
+            default: 'any',
+            mandatory: true,
+        }),
+        assignment_group: ReferenceColumn({
+            label: 'Assign to group',
+            referenceTable: 'sys_user_group',
+            mandatory: true,
+        }),
         assigned_to: ReferenceColumn({ label: 'Assign to person', referenceTable: 'sys_user' }),
         description: MultiLineTextColumn({ label: 'Description', maxLength: 1000 }),
     },
@@ -81,8 +139,15 @@ export const x_2312287_hrorch_ai_citation = Table({
     createRoles: [policyAdmin],
     deleteRoles: [policyAdmin],
     schema: {
-        hr_case: ReferenceColumn({ label: 'HR case', referenceTable: 'x_2312287_hrorch_hr_case', mandatory: true }),
-        source: ChoiceColumn({ label: 'Source', choices: { triage: 'Triage suggestion', chat: '@ai reply' } }),
+        hr_case: ReferenceColumn({
+            label: 'HR case',
+            referenceTable: 'x_2312287_hrorch_hr_case',
+            mandatory: true,
+        }),
+        source: ChoiceColumn({
+            label: 'Source',
+            choices: { triage: 'Triage suggestion', chat: '@ai reply' },
+        }),
         ref_number: IntegerColumn({ label: 'Reference' }),
         article: StringColumn({ label: 'Article', maxLength: 40 }),
         kb_article: ReferenceColumn({ label: 'Knowledge article', referenceTable: 'kb_knowledge' }),
@@ -93,6 +158,8 @@ export const x_2312287_hrorch_ai_citation = Table({
         start_char: IntegerColumn({ label: 'Start position' }),
         end_char: IntegerColumn({ label: 'End position' }),
         trace_id: StringColumn({ label: 'AI trace ID', maxLength: 40 }),
+        // Set when a later triage of the same case replaced the suggestion this quote belonged to.
+        superseded: BooleanColumn({ label: 'Superseded', default: false }),
     },
 })
 
@@ -110,7 +177,25 @@ export const x_2312287_hrorch_hr_profile = Table({
         user: ReferenceColumn({ label: 'Employee', referenceTable: 'sys_user', mandatory: true }),
         country: ChoiceColumn({
             label: 'Country',
-            choices: { US: 'United States', DE: 'Germany', IN: 'India', GB: 'United Kingdom' },
+            // ISO 3166 codes. AgentClient also maps a location's country name to a code through
+            // these labels, so this is the one list of countries the app knows.
+            choices: {
+                US: 'United States',
+                DE: 'Germany',
+                IN: 'India',
+                GB: 'United Kingdom',
+                IT: 'Italy',
+                FR: 'France',
+                ES: 'Spain',
+                NL: 'Netherlands',
+                IE: 'Ireland',
+                CA: 'Canada',
+                MX: 'Mexico',
+                BR: 'Brazil',
+                AU: 'Australia',
+                JP: 'Japan',
+                CN: 'China',
+            },
             dropdown: 'dropdown_with_none',
         }),
         employee_type: ChoiceColumn({

@@ -87,21 +87,26 @@ On any open case, as admin or an HR agent, post work notes:
 | 7.2 | `@ai check KB0090002 for the notice period` | Reply cites KB0090002 specifically |
 | 7.3 | `@ai summarise this case` | Reply about the case; no close proposal |
 | 7.4 | Check the AI Citations list | New rows with source "@ai reply" |
+| 7.5 | Impersonate **Anna** and post `@ai what is my notice period?` as an additional comment on her case | No AI reply: only HR agents can call the assistant, and only from work notes |
+| 7.6 | On a case for **Anna** (Germany): `@ai check KB0090001` (the US parental leave article) | Reply says it can't find it: the assistant only reads the employee's country's and global policies |
 
 ## 8. Close proposal and approval (human in the loop)
 
 | # | Steps | Expected |
 |---|---|---|
-| 8.1 | Work note `@ai the employee is answered, please close this` | Reply plus "Proposed closing this case…"; AI proposed action = Close case; state still Open |
+| 8.1 | Work note `@ai the employee is answered, please close this` | Reply plus "Proposed closing this case…"; AI proposed action = Close case, AI proposal state = Pending approval; state still Open |
 | 8.2 | Check the form header | **Approve AI close** and **Reject AI close** buttons are visible |
-| 8.3 | Click **Reject AI close** | Proposal = Rejected; case stays open; work note records who rejected |
-| 8.4 | Repeat 8.1, then click **Approve AI close** | State Closed Complete; close notes = AI resolution; work note records who approved; case leaves **Open HR Cases** |
+| 8.3 | Click **Reject AI close** | Proposal state = Rejected; buttons disappear; case stays open; work note records who rejected |
+| 8.4 | Repeat 8.1, then post another work note `@ai summarise this case` | Proposal state = Superseded; the Approve and Reject buttons disappear (a stale proposal can't be approved) |
+| 8.5 | Repeat 8.1, then click **Approve AI close** | State Closed Complete; proposal state Approved; close notes = AI resolution; work note records who approved; case leaves **Open HR Cases** |
 
 ## 9. Re-run AI triage
 
 | # | Steps | Expected |
 |---|---|---|
-| 9.1 | Right-click the form header → **Re-run AI triage** on an open case | New AI result and work note; history keeps the earlier ones |
+| 9.1 | Right-click the form header → **Re-run AI triage** on an open case | "AI triage was queued" message; after a refresh a new AI result and work note; history keeps the earlier ones |
+| 9.2 | Look at the AI Citations list after 9.1 | Earlier triage citations are marked Superseded; the new ones are not |
+| 9.3 | Re-run triage on a case whose suggestion was already posted, with no policy change | Work note "AI suggestion quotes the same policy as the posted one; not posted again"; the employee gets no duplicate comment |
 
 ## 10. Settings
 
@@ -138,12 +143,15 @@ On any open case, as admin or an HR agent, post work notes:
 ## 14. Automated checks (on the Mac)
 
 ```bash
-docker compose run --rm agent pytest -m "not integration"   # unit tests
-docker compose run --rm agent pytest -s -m integration      # retrieval recall@5 and graph runs
-python3 scripts/run_scenarios.py                            # end-to-end checks against the running API
+T="-e DATABASE_URL=postgresql://hr:hr@db:5432/hr_test -e KB_SOURCE=local"
+docker compose run --rm $T agent pytest -m "not integration"   # citation rules, tool binding, parsing
+docker compose run --rm $T agent pytest -m integration         # safety gates over the HTTP API
+python3 scripts/check_choice_lists.py                          # ServiceNow choices match the service
+docker compose run --rm agent python -m evals.retrieval        # retrieval recall@5 (live index)
+python3 scripts/run_scenarios.py                               # end-to-end checks, real model
 ```
 
-Expect all tests to pass, recall@5 = 1.00, and 11/11 scenario checks.
+Expect all tests to pass, matching choice lists, recall@5 = 1.00 and 11/11 scenario checks. The tests use a scratch database (`hr_test`, created once), so they never touch the live index.
 
 ## Known limits (say these if asked)
 

@@ -1,4 +1,5 @@
 """Generate the shareable design document HTML. Usage: python3 design_doc.py OUT.html"""
+
 import sys
 from html import escape
 
@@ -13,50 +14,78 @@ STYLE = {
 def box(x, y, w, h, title, sub, st):
     _, stroke, _ = STYLE[st]
     cx = x + w / 2
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="#fff" stroke="{stroke}"/>'
-            f'<text x="{cx}" y="{y + h / 2 - 2}" text-anchor="middle" font-size="10.5" font-weight="600">{escape(title)}</text>'
-            f'<text x="{cx}" y="{y + h / 2 + 11}" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>')
+    return (
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="#fff" stroke="{stroke}"/>'
+        f'<text x="{cx}" y="{y + h / 2 - 2}" text-anchor="middle" font-size="10.5" font-weight="600">{escape(title)}</text>'
+        f'<text x="{cx}" y="{y + h / 2 + 11}" text-anchor="middle" font-size="8.5" fill="#57534e">{escape(sub)}</text>'
+    )
 
 
 def zone(x, y, w, h, title, st):
     fill, stroke, ink = STYLE[st]
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="{stroke}"/>'
-            f'<text x="{x + 10}" y="{y + 18}" font-size="11" font-weight="700" fill="{ink}">{escape(title)}</text>')
+    return (
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="{stroke}"/>'
+        f'<text x="{x + 10}" y="{y + 18}" font-size="11" font-weight="700" fill="{ink}">{escape(title)}</text>'
+    )
 
 
 def architecture():
-    o = ['<svg viewBox="0 0 760 330" role="img" aria-label="Architecture overview">',
-         '<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
+    o = [
+        '<svg viewBox="0 0 760 330" role="img" aria-label="Architecture overview">',
+        '<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
     o.append(zone(0, 20, 126, 300, "People", "ppl"))
-    for y, t, s in [(52, "Employee", "submits, reads replies"), (122, "HR agent", "works cases, approves"), (192, "Policy admin", "owns rules, policies")]:
+    for y, t, s in [
+        (52, "Employee", "submits, reads replies"),
+        (122, "HR agent", "works cases, approves"),
+        (192, "Policy admin", "owns rules, policies"),
+    ]:
         o.append(box(8, y, 110, 46, t, s, "ppl"))
     o.append(zone(140, 20, 330, 300, "ServiceNow platform", "sn"))
-    for y, t, s in [(52, "Case management", "case table, portal, form"), (122, "Routing policy", "HR routing rules"),
-                    (192, "Knowledge base", "HR policy articles"), (262, "Audit", "AI fields, citations, log")]:
+    for y, t, s in [
+        (52, "Case management", "case table, portal, form"),
+        (122, "Routing policy", "HR routing rules"),
+        (192, "Knowledge base", "HR policy articles"),
+        (262, "Audit", "AI fields, citations, log"),
+    ]:
         o.append(box(150, y, 150, 46, t, s, "sn"))
-    for y, t, s in [(52, "Orchestration", "Business rules, events"), (122, "Outbound integration", "REST, key in settings"),
-                    (192, "Read-only API", "integration user"), (262, "Human approval", "UI action for close")]:
+    for y, t, s in [
+        (52, "Orchestration", "Business rules, events"),
+        (122, "Outbound integration", "REST, key in settings"),
+        (192, "Read-only API", "integration user"),
+        (262, "Human approval", "UI action for close"),
+    ]:
         o.append(box(310, y, 150, 46, t, s, "sn"))
     o.append(zone(485, 20, 170, 300, "AI agent service", "ag"))
-    for y, t, s in [(46, "API gateway", "TLS, auth, rate limits"), (100, "Agent orchestrator", "triage and chat"),
-                    (154, "Tool server (MCP)", "read-only tools"), (208, "Ingestion", "parse, chunk, embed"),
-                    (262, "Search index", "vectors + keywords")]:
+    for y, t, s in [
+        (46, "API gateway", "TLS, auth, rate limits"),
+        (100, "Agent orchestrator", "triage and chat"),
+        (154, "Tool server (MCP)", "read-only tools"),
+        (208, "Ingestion", "parse, chunk, embed"),
+        (262, "Search index", "vectors + keywords"),
+    ]:
         o.append(box(495, y, 150, 44, t, s, "ag"))
-    o.append('<rect x="668" y="96" width="90" height="56" rx="8" fill="#fdf3e4" stroke="#a35c00"/>'
-             '<text x="713" y="120" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a35c00">LLM provider</text>'
-             '<text x="713" y="135" text-anchor="middle" font-size="8.5" fill="#57534e">behind an adapter</text>')
-    o.append('<g stroke="#44403c" stroke-width="1.4" fill="none">'
-             '<line x1="118" y1="75" x2="148" y2="75" marker-end="url(#a)"/>'
-             '<line x1="118" y1="145" x2="148" y2="75" marker-end="url(#a)"/>'
-             '<line x1="118" y1="215" x2="148" y2="145" marker-end="url(#a)"/>'
-             '<line x1="118" y1="215" x2="148" y2="215" marker-end="url(#a)"/>'
-             '<line x1="460" y1="145" x2="474" y2="145"/><path d="M474,145 V68 H493" marker-end="url(#a)"/>'
-             '<path d="M495,176 H478 V215 H462" marker-end="url(#a)"/>'
-             '<path d="M495,230 H478"/>'
-             '<line x1="645" y1="122" x2="666" y2="122" marker-start="url(#a)" marker-end="url(#a)"/>'
-             '</g>')
-    o.append('<g font-size="9" fill="#57534e" text-anchor="middle">'
-             '<text x="478" y="14">HTTPS</text></g>')
+    o.append(
+        '<rect x="668" y="96" width="90" height="56" rx="8" fill="#fdf3e4" stroke="#a35c00"/>'
+        '<text x="713" y="120" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a35c00">LLM provider</text>'
+        '<text x="713" y="135" text-anchor="middle" font-size="8.5" fill="#57534e">behind an adapter</text>'
+    )
+    o.append(
+        '<g stroke="#44403c" stroke-width="1.4" fill="none">'
+        '<line x1="118" y1="75" x2="148" y2="75" marker-end="url(#a)"/>'
+        '<line x1="118" y1="145" x2="148" y2="75" marker-end="url(#a)"/>'
+        '<line x1="118" y1="215" x2="148" y2="145" marker-end="url(#a)"/>'
+        '<line x1="118" y1="215" x2="148" y2="215" marker-end="url(#a)"/>'
+        '<line x1="460" y1="145" x2="474" y2="145"/><path d="M474,145 V68 H493" marker-end="url(#a)"/>'
+        '<path d="M495,176 H478 V215 H462" marker-end="url(#a)"/>'
+        '<path d="M495,230 H478"/>'
+        '<line x1="645" y1="122" x2="666" y2="122" marker-start="url(#a)" marker-end="url(#a)"/>'
+        "</g>"
+    )
+    o.append(
+        '<g font-size="9" fill="#57534e" text-anchor="middle">'
+        '<text x="478" y="14">HTTPS</text></g>'
+    )
     o.append("</svg>")
     return "\n".join(o)
 
@@ -65,7 +94,12 @@ LANES = [70, 250, 450, 650]
 
 
 def sequence():
-    lanes = [("Employee", "ppl"), ("ServiceNow", "sn"), ("AI agent service", "ag"), ("LLM provider", "llm")]
+    lanes = [
+        ("Employee", "ppl"),
+        ("ServiceNow", "sn"),
+        ("AI agent service", "ag"),
+        ("LLM provider", "llm"),
+    ]
     steps = [
         ("m", 0, 1, "Submits a case", False),
         ("m", 1, 2, "Triage request: case text, country, employee type", False),
@@ -80,13 +114,17 @@ def sequence():
     ]
     top, step = 66, 27
     bottom = top + step * (len(steps) - 1) + 16
-    o = [f'<svg viewBox="0 0 720 {bottom + 4}" role="img" aria-label="New case flow">',
-         '<defs><marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
-    for x, (t, st) in zip(LANES, lanes):
+    o = [
+        f'<svg viewBox="0 0 720 {bottom + 4}" role="img" aria-label="New case flow">',
+        '<defs><marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
+    for x, (t, st) in zip(LANES, lanes, strict=False):
         fill, stroke, ink = STYLE[st]
-        o.append(f'<rect x="{x - 65}" y="6" width="130" height="34" rx="6" fill="{fill}" stroke="{stroke}"/>'
-                 f'<text x="{x}" y="27" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>'
-                 f'<line x1="{x}" y1="40" x2="{x}" y2="{bottom}" stroke="#a8a29e" stroke-dasharray="3 4"/>')
+        o.append(
+            f'<rect x="{x - 65}" y="6" width="130" height="34" rx="6" fill="{fill}" stroke="{stroke}"/>'
+            f'<text x="{x}" y="27" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ink}">{escape(t)}</text>'
+            f'<line x1="{x}" y1="40" x2="{x}" y2="{bottom}" stroke="#a8a29e" stroke-dasharray="3 4"/>'
+        )
     for i, s in enumerate(steps):
         y, n = top + step * i, i + 1
         if s[0] == "m":
@@ -94,33 +132,49 @@ def sequence():
             xa, xb = LANES[a], LANES[b]
             end = xb - 2 if xb > xa else xb + 2
             d = ' stroke-dasharray="5 3"' if dashed else ""
-            o.append(f'<line x1="{xa}" y1="{y}" x2="{end}" y2="{y}" stroke="#44403c" stroke-width="1.4" marker-end="url(#s)"{d}/>'
-                     f'<text x="{(xa + xb) / 2}" y="{y - 5}" text-anchor="middle" font-size="10" class="halo">{n}  {escape(text)}</text>')
+            o.append(
+                f'<line x1="{xa}" y1="{y}" x2="{end}" y2="{y}" stroke="#44403c" stroke-width="1.4" marker-end="url(#s)"{d}/>'
+                f'<text x="{(xa + xb) / 2}" y="{y - 5}" text-anchor="middle" font-size="10" class="halo">{n}  {escape(text)}</text>'
+            )
         else:
             _, a, text = s
             x = LANES[a]
             fill, stroke, _ = STYLE[lanes[a][1]]
-            o.append(f'<rect x="{x - 7}" y="{y - 10}" width="14" height="20" rx="2" fill="{fill}" stroke="{stroke}"/>'
-                     f'<text x="{x + 14}" y="{y + 4}" font-size="10" class="halo">{n}  {escape(text)}</text>')
+            o.append(
+                f'<rect x="{x - 7}" y="{y - 10}" width="14" height="20" rx="2" fill="{fill}" stroke="{stroke}"/>'
+                f'<text x="{x + 14}" y="{y + 4}" font-size="10" class="halo">{n}  {escape(text)}</text>'
+            )
     o.append("</svg>")
     return "\n".join(o)
 
 
 def pipeline():
-    items = [(["Policy published", "or updated"], "sn"), (["Ingestion", "triggered"], "sn"), (["Parse", "into sections"], "ag"),
-             (["Chunk", "by heading and size"], "ag"), (["Embed", "and index"], "ag"), (["Searchable", "with citations"], "ag")]
+    items = [
+        (["Policy published", "or updated"], "sn"),
+        (["Ingestion", "triggered"], "sn"),
+        (["Parse", "into sections"], "ag"),
+        (["Chunk", "by heading and size"], "ag"),
+        (["Embed", "and index"], "ag"),
+        (["Searchable", "with citations"], "ag"),
+    ]
     n, gap = len(items), 18
     w = (720 - gap * (n - 1)) / n
-    o = ['<svg viewBox="0 0 720 62" role="img" aria-label="Knowledge ingestion pipeline">',
-         '<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>']
+    o = [
+        '<svg viewBox="0 0 720 62" role="img" aria-label="Knowledge ingestion pipeline">',
+        '<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#44403c"/></marker></defs>',
+    ]
     for i, (lines, st) in enumerate(items):
         fill, stroke, _ = STYLE[st]
         x = i * (w + gap)
-        o.append(f'<rect x="{x + 0.5}" y="4" width="{w - 1}" height="52" rx="6" fill="{fill}" stroke="{stroke}"/>'
-                 f'<text x="{x + w / 2}" y="26" text-anchor="middle" font-size="10" font-weight="600">{escape(lines[0])}</text>'
-                 f'<text x="{x + w / 2}" y="41" text-anchor="middle" font-size="9" fill="#57534e">{escape(lines[1])}</text>')
+        o.append(
+            f'<rect x="{x + 0.5}" y="4" width="{w - 1}" height="52" rx="6" fill="{fill}" stroke="{stroke}"/>'
+            f'<text x="{x + w / 2}" y="26" text-anchor="middle" font-size="10" font-weight="600">{escape(lines[0])}</text>'
+            f'<text x="{x + w / 2}" y="41" text-anchor="middle" font-size="9" fill="#57534e">{escape(lines[1])}</text>'
+        )
         if i < n - 1:
-            o.append(f'<line x1="{x + w + 1}" y1="30" x2="{x + w + gap - 2}" y2="30" stroke="#44403c" stroke-width="1.4" marker-end="url(#p)"/>')
+            o.append(
+                f'<line x1="{x + w + 1}" y1="30" x2="{x + w + gap - 2}" y2="30" stroke="#44403c" stroke-width="1.4" marker-end="url(#p)"/>'
+            )
     o.append("</svg>")
     return "\n".join(o)
 
@@ -152,7 +206,7 @@ CSS = """
   svg .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
 """
 
-HTML = f'''<!doctype html>
+HTML = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>HR Case Orchestration Design</title><style>{CSS}</style></head>
 <body>
 
@@ -330,6 +384,6 @@ HTML = f'''<!doctype html>
 </div>
 
 </body></html>
-'''
+"""
 
 open(sys.argv[1], "w").write(HTML)

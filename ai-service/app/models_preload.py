@@ -1,4 +1,5 @@
 """Downloads the embedding and reranking models at image build time, so startup needs no network."""
+
 from fastembed import TextEmbedding
 from fastembed.rerank.cross_encoder import TextCrossEncoder
 

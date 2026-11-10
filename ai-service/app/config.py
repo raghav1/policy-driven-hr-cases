@@ -3,6 +3,7 @@
 Every setting can be overridden by an environment variable of the same name in upper case,
 for example LLM_MODEL=claude-sonnet-5-5.
 """
+
 from functools import lru_cache
 from typing import Literal
 
@@ -13,10 +14,16 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # --- API -----------------------------------------------------------------------------
-    # Shared secret ServiceNow sends in the X-API-Key header. Requests are refused while it is empty.
+    # Shared secret ServiceNow sends in the X-API-Key header. Requests are refused while it is
+    # empty.
     service_api_key: str = ""
-    rate_limit_per_minute: int = 120
     log_level: str = "INFO"
+    # Agent runs (triage and chat) in progress at once; each holds model calls open. Requests over
+    # the
+    # limit wait up to queue_timeout_seconds, then get a "busy" error and ServiceNow routes to
+    # manual.
+    max_concurrent_runs: int = 4
+    queue_timeout_seconds: float = 30.0
 
     # --- LLM -----------------------------------------------------------------------------
     # "offline" swaps the model for a deterministic stand-in, for running without a provider key.

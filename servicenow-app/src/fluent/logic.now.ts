@@ -1,10 +1,18 @@
 // Server logic: settings, script includes, events, business rules, script actions and UI actions.
-import { BusinessRule, Property, Record, ScriptAction, ScriptInclude, UiAction } from '@servicenow/sdk/core'
+import {
+    BusinessRule,
+    Property,
+    Record,
+    ScriptAction,
+    ScriptInclude,
+    UiAction,
+} from '@servicenow/sdk/core'
 import { hrAgent } from './roles.now'
 
 // ---- configuration ------------------------------------------------------------
 // The service URL and API key are instance-specific secrets, so they are not part of the app.
-// scripts/configure-agent.sh creates hr_orchestration.agent.base_url and .agent.api_key in global scope.
+// scripts/configure-agent.sh creates hr_orchestration.agent.base_url and .agent.api_key in
+// global scope.
 
 Property({
     $id: Now.ID['prop_timeout'],
@@ -57,6 +65,18 @@ ScriptInclude({
 })
 
 // ---- events -------------------------------------------------------------------
+// AI work runs in script actions, off the user's transaction: new cases and re-runs share one path.
+
+Record({
+    $id: Now.ID['event_triage'],
+    table: 'sysevent_register',
+    data: {
+        event_name: 'x_2312287_hrorch.triage',
+        table: 'x_2312287_hrorch_hr_case',
+        description: 'An HR case needs AI triage (new case or a re-run). parm1 = reason.',
+        fired_by: 'Business rule: HR case AI triage; UI action: Re-run AI triage',
+    },
+})
 
 Record({
     $id: Now.ID['event_ai_mention'],
@@ -64,7 +84,7 @@ Record({
     data: {
         event_name: 'x_2312287_hrorch.ai_mention',
         table: 'x_2312287_hrorch_hr_case',
-        description: 'Someone tagged @ai on an HR case. parm1 = message, parm2 = author.',
+        description: 'An HR agent tagged @ai in a work note. parm1 = message, parm2 = author.',
         fired_by: 'Business rule: HR case @ai mention',
     },
 })
@@ -86,12 +106,12 @@ BusinessRule({
     $id: Now.ID['br_triage'],
     name: 'HR case: AI triage',
     table: 'x_2312287_hrorch_hr_case',
-    when: 'async',
+    when: 'after',
     action: ['insert'],
     order: 100,
     active: true,
     script: `(function executeRule(current, previous) {
-    new CaseOrchestrator().runTriage(current.getUniqueValue());
+    gs.eventQueue('x_2312287_hrorch.triage', current, 'new case', '');
 })(current, previous);`,
 })
 
@@ -103,12 +123,15 @@ BusinessRule({
     action: ['update'],
     order: 200,
     active: true,
-    condition: 'current.work_notes.changes() || current.comments.changes()',
+    // Only HR staff can ask the assistant, and only in work notes: employee comments are case data.
+    condition: 'current.work_notes.changes()',
     script: `(function executeRule(current, previous) {
-    var text = current.work_notes.toString() || current.comments.toString();
+    if (!gs.hasRole('x_2312287_hrorch.hr_agent')) return;
+    var text = current.work_notes.toString();
     if (!text || text.indexOf('[AI assistant]') === 0) return;
     if (!/(^|\\s)@ai\\b/i.test(text)) return;
-    gs.eventQueue('x_2312287_hrorch.ai_mention', current, text.substring(0, 3900), gs.getUserName());
+    var message = text.substring(0, 3900);
+    gs.eventQueue('x_2312287_hrorch.ai_mention', current, message, gs.getUserName());
 })(current, previous);`,
 })
 
@@ -120,7 +143,10 @@ BusinessRule({
     action: ['insert', 'update'],
     order: 200,
     active: true,
-    condition: "current.kb_knowledge_base.title == 'HR Policies' && (current.workflow_state.changes() || current.text.changes() || current.short_description.changes())",
+    condition:
+        `current.kb_knowledge_base.title == 'HR Policies' &&
+        (current.workflow_state.changes() || current.text.changes() ||
+        current.short_description.changes())`,
     script: `(function executeRule(current, previous) {
     var event = current.getValue('workflow_state') == 'published' ? 'updated' : 'retired';
     gs.eventQueue('x_2312287_hrorch.kb_changed', current, event, '');
@@ -130,13 +156,25 @@ BusinessRule({
 // ---- script actions (run off the user's transaction) ------------------------------
 
 ScriptAction({
+    $id: Now.ID['sa_triage'],
+    name: 'HR case: run AI triage',
+    eventName: 'x_2312287_hrorch.triage',
+    active: true,
+    order: 100,
+    script: `(function () {
+    new CaseOrchestrator().runTriage(current.getUniqueValue());
+})();`,
+})
+
+ScriptAction({
     $id: Now.ID['sa_ai_mention'],
     name: 'HR case: answer @ai mention',
     eventName: 'x_2312287_hrorch.ai_mention',
     active: true,
     order: 100,
     script: `(function () {
-    new CaseOrchestrator().handleMention(current.getUniqueValue(), String(event.parm1), String(event.parm2));
+    var caseId = current.getUniqueValue();
+    new CaseOrchestrator().handleMention(caseId, String(event.parm1), String(event.parm2));
 })();`,
 })
 
@@ -147,8 +185,11 @@ ScriptAction({
     active: true,
     order: 100,
     script: `(function () {
-    var result = new AgentClient().ingest(current, String(event.parm1));
-    if (!result.ok) gs.warn('HR policy re-ingest failed for ' + current.getValue('number') + ': ' + result.error);
+    var result = new AgentClient().ingest(current);
+    if (!result.ok) {
+        var number = current.getValue('number');
+        gs.warn('HR policy re-ingest failed for ' + number + ': ' + result.error);
+    }
 })();`,
 })
 
@@ -160,7 +201,9 @@ UiAction({
     name: 'Approve AI close',
     actionName: 'x_2312287_hrorch_approve_ai_close',
     hint: 'Close this case with the resolution the AI proposed',
-    condition: "current.ai_proposed_action == 'close' && current.active == true",
+    condition:
+        `current.ai_proposed_action == 'close' && current.ai_proposal_state == 'pending' &&
+        current.active == true`,
     showInsert: false,
     showUpdate: true,
     form: { showButton: true, style: 'primary' },
@@ -176,7 +219,9 @@ UiAction({
     name: 'Reject AI close',
     actionName: 'x_2312287_hrorch_reject_ai_close',
     hint: 'Keep the case open and dismiss the AI proposal',
-    condition: "current.ai_proposed_action == 'close' && current.active == true",
+    condition:
+        `current.ai_proposed_action == 'close' && current.ai_proposal_state == 'pending' &&
+        current.active == true`,
     showInsert: false,
     showUpdate: true,
     form: { showButton: true },
@@ -198,6 +243,7 @@ UiAction({
     form: { showContextMenu: true },
     roles: [hrAgent],
     order: 200,
-    script: `new CaseOrchestrator().runTriage(current.getUniqueValue());
+    script: `gs.eventQueue('x_2312287_hrorch.triage', current, 're-run', gs.getUserName());
+gs.addInfoMessage('AI triage was queued. Refresh in a few seconds to see the result.');
 action.setRedirectURL(current);`,
 })
